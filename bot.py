@@ -12,16 +12,16 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 async def ping(ctx):
     await ctx.send("Pong! 🏓")
 
-@bot.command(name="fidesz_berenc")
-async def fidesz_berenc(ctx):
+@bot.command(name="fidesz")
+async def fidesz(ctx):
     osszeg = 0
-
-    # Egész csatorna üzeneteinek feldolgozása
+    # Feldolgozza az egész csatornát
     async for message in ctx.channel.history(limit=None):
-        # Csak 1-2 jegyű számokat veszünk figyelembe
-        talalatok = re.findall(r'\b\d{1,2}\b', message.content)
+        # Regex: minden 1-4 jegyű számot talál
+        talalatok = re.findall(r'\b\d{1,4}\b', message.content)
+        # Összegzés
         osszeg += sum(int(n) for n in talalatok)
-
+    
     await ctx.send(f"Összegük: {osszeg}")
 
 @bot.event
