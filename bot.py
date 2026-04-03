@@ -28,10 +28,22 @@ async def fidesz(ctx):
 
     if szamok:
         osszeg = sum(szamok)
-        # Az összes számot + végső összeget egy üzenetben küldjük
         await ctx.send(f"{' + '.join(map(str, szamok))}\nÖsszegük: {osszeg}")
     else:
         await ctx.send("❌ Nem találtam 1-2 jegyű számokat az utolsó 1000 üzenetben!")
+
+# Szorzás parancs - tetszőleges számú szám
+@bot.command(name="szoroz")
+async def szoroz(ctx, *szamok: int):
+    if not szamok:
+        await ctx.send("❌ Adj meg legalább egy számot a szorzáshoz!")
+        return
+
+    eredmeny = 1
+    for szam in szamok:
+        eredmeny *= szam
+
+    await ctx.send(f"{' * '.join(map(str, szamok))} = {eredmeny}")
 
 # Ready event
 @bot.event
