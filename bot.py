@@ -21,13 +21,15 @@ async def fidesz_berenc(ctx):
 
     # Utolsó 200 üzenet lekérése a csatornából
     async for message in ctx.channel.history(limit=200):
-        # Csak 1-2 jegyű számok kinyerése az üzenetből
-        szamok += [int(n) for n in re.findall(r'\b\d{1,2}\b', message.content)]
+        # Csak a rövid számokat (1-2 jegyű) gyűjtjük
+        talalatok = re.findall(r'\b\d{1,2}\b', message.content)
+        szamok.extend(int(n) for n in talalatok)
 
     if szamok:
         osszeg = sum(szamok)
-        # Az összes számot + végső összeget egy üzenetben küldjük
-        await ctx.send(f"{' + '.join(map(str, szamok))}\nÖsszegük: {osszeg}")
+        # Egy sorba írjuk ki a számokat, majd a végén az összeget
+        szamok_str = " + ".join(str(n) for n in szamok)
+        await ctx.send(f"{szamok_str} = {osszeg}")
     else:
         await ctx.send("❌ Nem találtam rövid számokat az utolsó 200 üzenetben!")
 
