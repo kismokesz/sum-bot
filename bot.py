@@ -15,23 +15,13 @@ async def ping(ctx):
 
 @bot.command(name="fidesz_berenc")
 async def fidesz_berenc(ctx):
-    szamok = []
-    async for msg in ctx.channel.history(limit=1000):
+    async for msg in ctx.channel.history(limit=100):  # az utolsó 100 üzenet
         # Keresés minden számra (szóköz vagy vessző lehet)
         talalatok = re.findall(r'\d[\d ,]*\d|\d', msg.content)
+        szamok = []
         for t in talalatok:
-            # Vessző és szóköz eltávolítása
             szamok.append(int(t.replace(",", "").replace(" ", "")))
-    
-    if szamok:
-        osszeg = sum(szamok)
-        await ctx.send(f"A csatorna összes számának összege: {osszeg}")
-    else:
-        await ctx.send("❌ Nem találtam számokat a csatorna üzeneteiben!")
-
-@bot.event
-async def on_ready():
-    print(f'Bejelentkezve mint {bot.user}')
-
-token = os.getenv("DISCORD_TOKEN")
-bot.run(token)
+        
+        if szamok:
+            osszeg = sum(szamok)
+            await ctx.send(f"Üzenet ID {msg.id} számainak összege: {osszeg}")
