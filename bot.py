@@ -19,8 +19,8 @@ async def ping(ctx):
 async def fidesz(ctx):
     szamok = []
 
-    # Utolsó 200 üzenet lekérése a csatornából
-    async for message in ctx.channel.history(limit=200):
+    # Utolsó 1000 üzenet lekérése a csatornából
+    async for message in ctx.channel.history(limit=1000):
         # Minden szám kinyerése az üzenetből
         talalatok = re.findall(r'\d+', message.content)
         # Csak 1-2 jegyű számokat vegye figyelembe
@@ -31,7 +31,7 @@ async def fidesz(ctx):
         # Az összes számot + végső összeget egy üzenetben küldjük
         await ctx.send(f"{' + '.join(map(str, szamok))}\nÖsszegük: {osszeg}")
     else:
-        await ctx.send("❌ Nem találtam 1-2 jegyű számokat az utolsó 200 üzenetben!")
+        await ctx.send("❌ Nem találtam 1-2 jegyű számokat az utolsó 1000 üzenetben!")
 
 # Ready event
 @bot.event
