@@ -1,3 +1,4 @@
+
 import os
 import discord
 from discord.ext import commands
@@ -7,10 +8,10 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Jegyek adatai
+# Jegyek adatai (ide írd a tényleges számokat a jegyek alá)
 jegyek = {
-    "fidesz_berenc": [5, 3, 4],  # ide írd a tényleges számokat
-    "ellenzek": [2, 7, 1],        # példa más szóra
+    "fidesz_berenc": [5, 3, 4],  # példa számok, cseréld le a valós adatokra
+    "ellenzek": [2, 7, 1],        # példa másik szóra
 }
 
 # Ping parancs teszteléshez
@@ -24,7 +25,8 @@ async def fidesz_berenc(ctx):
     szamok = jegyek.get("fidesz_berenc", [])
     if szamok:
         osszeg = sum(szamok)
-        await ctx.send(f"A 'fidesz_berenc' alatti számok összege: {osszeg}")
+        # Válasz a Discordra: számok listája + összeg
+        await ctx.send(f"A 'fidesz_berenc' alatti számok: {szamok}\nÖsszegük: {osszeg}")
     else:
         await ctx.send("❌ Nincsenek számok ehhez a parancshoz!")
 
