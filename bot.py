@@ -15,4 +15,4 @@ async def ping(ctx):
 async def on_ready():
     print(f'Bejelentkezve mint {bot.user}')
 
-bot.run(os.getenv("DISCORD_TOKEN")
+bot.run(os.getenv("DISCORD_TOKEN"))
