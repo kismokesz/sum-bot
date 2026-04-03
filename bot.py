@@ -1,5 +1,5 @@
-
 import os
+import re
 import discord
 from discord.ext import commands
 
@@ -8,27 +8,32 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Jegyek adatai (ide írd a tényleges számokat a jegyek alá)
-jegyek = {
-    "fidesz_berenc": [5, 3, 4],  # példa számok, cseréld le a valós adatokra
-    "ellenzek": [2, 7, 1],        # példa másik szóra
-}
-
 # Ping parancs teszteléshez
 @bot.command()
 async def ping(ctx):
     await ctx.send("Pong! 🏓")
 
-# Fidesz Berenc parancs
+# Fidesz Berenc parancs: a szövegből olvassa ki a számokat
 @bot.command(name="fidesz_berenc")
 async def fidesz_berenc(ctx):
-    szamok = jegyek.get("fidesz_berenc", [])
+    # Az üzenetben lévő számokat keressük regex-szel
+    # Feltételezzük, hogy a számok a "jegy alatt" szövegben vannak
+    jegy_szoveg = ""
+    # Ha az üzenetnek van "reply"-je, akkor a reply tartalmát használjuk
+    if ctx.message.reference:
+        replied_message = await ctx.channel.fetch_message(ctx.message.reference.message_id)
+        jegy_szoveg = replied_message.content
+    else:
+        jegy_szoveg = ctx.message.content
+
+    # Számok kinyerése a szövegből
+    szamok = [int(n) for n in re.findall(r'\d+', jegy_szoveg)]
+    
     if szamok:
         osszeg = sum(szamok)
-        # Válasz a Discordra: számok listája + összeg
         await ctx.send(f"A 'fidesz_berenc' alatti számok: {szamok}\nÖsszegük: {osszeg}")
     else:
-        await ctx.send("❌ Nincsenek számok ehhez a parancshoz!")
+        await ctx.send("❌ Nem találtam számokat a jegyben!")
 
 @bot.event
 async def on_ready():
