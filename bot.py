@@ -13,32 +13,22 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 async def ping(ctx):
     await ctx.send("Pong! 🏓")
 
-# Fidesz Berenc parancs: a szövegből olvassa ki a számokat
+# Fidesz Berenc parancs
 @bot.command(name="fidesz_berenc")
 async def fidesz_berenc(ctx):
-    # Az üzenetben lévő számokat keressük regex-szel
-    # Feltételezzük, hogy a számok a "jegy alatt" szövegben vannak
-    jegy_szoveg = ""
-    # Ha az üzenetnek van "reply"-je, akkor a reply tartalmát használjuk
-    if ctx.message.reference:
+    # Ellenőrizzük, hogy reply üzenetre jött-e
+    if ctx.message.reference:  # ha reply
         replied_message = await ctx.channel.fetch_message(ctx.message.reference.message_id)
-        jegy_szoveg = replied_message.content
+        szamok = [int(n) for n in re.findall(r'\d+', replied_message.content)]
     else:
-        jegy_szoveg = ctx.message.content
+        # Ha nincs reply, akkor a parancs utáni szövegből keresünk számokat
+        szamok = [int(n) for n in re.findall(r'\d+', ctx.message.content)]
+        # Eltávolítjuk a parancs szövegét (pl. !fidesz_berenc)
+        if szamok:
+            szamok = szamok[1:]  # első szám a parancs száma lehet, eltávolítjuk
 
-    # Számok kinyerése a szövegből
-    szamok = [int(n) for n in re.findall(r'\d+', jegy_szoveg)]
-    
     if szamok:
         osszeg = sum(szamok)
         await ctx.send(f"A 'fidesz_berenc' alatti számok: {szamok}\nÖsszegük: {osszeg}")
     else:
         await ctx.send("❌ Nem találtam számokat a jegyben!")
-
-@bot.event
-async def on_ready():
-    print(f'Bejelentkezve mint {bot.user}')
-
-# Token Railway environment variable-ból
-token = os.getenv("DISCORD_TOKEN")
-bot.run(token)
