@@ -1,32 +1,37 @@
-import os
-import re
-import discord
-from discord.ext import commands
+module.exports = (client) => {
+  client.on('interactionCreate', async (interaction) => {
+    if (!interaction.isChatInputCommand()) return;
+    if (interaction.commandName !== 'cal') return;
 
-intents = discord.Intents.default()
-intents.message_content = True
+    const channel = interaction.channel;
 
-bot = commands.Bot(command_prefix="!", intents=intents)
+    await interaction.reply(':1234: Számolok...');
 
-@bot.command()
-async def ping(ctx):
-    await ctx.send("Pong! 🏓")
+    const messages = await channel.messages.fetch({ limit: 100 });
 
-@bot.command(name="fidesz")
-async def fidesz(ctx):
-    osszeg = 0
-    # Feldolgozza az egész csatornát
-    async for message in ctx.channel.history(limit=None):
-        # Regex: minden 1-4 jegyű számot talál
-        talalatok = re.findall(r'\b\d{1,4}\b', message.content)
-        # Összegzés
-        osszeg += sum(int(n) for n in talalatok)
-    
-    await ctx.send(f"Összegük: {osszeg}")
+    let sum = 0;
+    let count = 0;
 
-@bot.event
-async def on_ready():
-    print(f'Bejelentkezve mint {bot.user}')
+    messages.forEach(msg => {
+      // Mentions és csatorna hivatkozások eltávolítása mielőtt számokat keresünk
+      const cleaned = msg.content
+        .replace(/<@!?\d+>/g, '')   // user mention
+        .replace(/<#\d+>/g, '')     // csatorna mention
+        .replace(/<@&\d+>/g, '');   // role mention
 
-token = os.getenv("DISCORD_TOKEN")
-bot.run(token)
+      const numbers = cleaned.match(/-?\d+(\.\d+)?/g);
+      if (numbers) {
+        numbers.forEach(n => {
+          sum += parseFloat(n);
+          count++;
+        });
+      }
+    });
+
+    await interaction.editReply(
+      `✅ **Összesítés**\n` +
+      `📊 Talált számok: **${count} db**\n` +
+      `➕ Összeg: **${sum}**`
+    );
+  });
+};
