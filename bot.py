@@ -16,14 +16,16 @@ async def ping(ctx):
 # Sum parancs: üzenetenként összeadja a számokat
 @bot.command(name="sum")
 async def sum_numbers(ctx, limit: int = 50):  # alapértelmezett 50 üzenet
+    osszes = 0
     async for message in ctx.channel.history(limit=limit):
+        # Számok keresése az üzenetben
         numbers = re.findall(r'\d+', message.content)
         numbers = [int(n) for n in numbers]
         if numbers:
             osszeg = sum(numbers)
-            # Számok + jelekkel: "5 + 4 + 6 = 15"
-            numbers_str = " + ".join(map(str, numbers))
-            await ctx.send(f"Üzenet: `{message.content}`\nSzámok összege: {numbers_str} = {osszeg}")
+            osszes += osszeg
+            await ctx.send(f"Üzenetben lévő számok összege: {osszeg}")
+    await ctx.send(f"Csatorna összes üzenetbeli számának összege: {osszes}")
 
 @bot.event
 async def on_ready():
