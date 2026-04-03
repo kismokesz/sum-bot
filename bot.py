@@ -1,37 +1,34 @@
-module.exports = (client) => {
-  client.on('interactionCreate', async (interaction) => {
-    if (!interaction.isChatInputCommand()) return;
-    if (interaction.commandName !== 'cal') return;
+import os
+import re
+import discord
+from discord.ext import commands
 
-    const channel = interaction.channel;
+# Intents beállítása
+intents = discord.Intents.default()
+intents.message_content = True
 
-    await interaction.reply(':1234: Számolok...');
+bot = commands.Bot(command_prefix="!", intents=intents)
 
-    const messages = await channel.messages.fetch({ limit: 100 });
+@bot.command()
+async def ping(ctx):
+    await ctx.send("Pong! 🏓")
 
-    let sum = 0;
-    let count = 0;
+@bot.command(name="fidesz")
+async def fidesz(ctx):
+    osszeg = 0
+    async for message in ctx.channel.history(limit=None):
+        talalatok = re.findall(r'\d+', message.content)
+        osszeg += sum(int(n) for n in talalatok)
 
-    messages.forEach(msg => {
-      // Mentions és csatorna hivatkozások eltávolítása mielőtt számokat keresünk
-      const cleaned = msg.content
-        .replace(/<@!?\d+>/g, '')   // user mention
-        .replace(/<#\d+>/g, '')     // csatorna mention
-        .replace(/<@&\d+>/g, '');   // role mention
+    await ctx.send(f"Összegük: {osszeg}")
 
-      const numbers = cleaned.match(/-?\d+(\.\d+)?/g);
-      if (numbers) {
-        numbers.forEach(n => {
-          sum += parseFloat(n);
-          count++;
-        });
-      }
-    });
+@bot.event
+async def on_ready():
+    print(f'Bejelentkezve mint {bot.user}')
 
-    await interaction.editReply(
-      `✅ **Összesítés**\n` +
-      `📊 Talált számok: **${count} db**\n` +
-      `➕ Összeg: **${sum}**`
-    );
-  });
-};
+# Token Railway environment variable-ból
+token = os.getenv("DISCORD_TOKEN")
+if not token:
+    print("❌ Hiba: A DISCORD_TOKEN nincs beállítva!")
+else:
+    bot.run(token)
