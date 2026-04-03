@@ -13,19 +13,19 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 async def ping(ctx):
     await ctx.send("Pong! 🏓")
 
-# Sum parancs: üzenetenként összeadja a számokat
-@bot.command(name="sum")
-async def sum_numbers(ctx, limit: int = 50):  # alapértelmezett 50 üzenet
-    osszes = 0
+# Fidesz Berenc parancs: üzenetekből számokat keres és összead
+@bot.command(name="fidesz_berenc")
+async def fidesz_berenc(ctx, limit: int = 50):
+    """Összeszámolja az utolsó `limit` üzenetben található számokat a csatornában."""
+    total_sum = 0
     async for message in ctx.channel.history(limit=limit):
         # Számok keresése az üzenetben
         numbers = re.findall(r'\d+', message.content)
         numbers = [int(n) for n in numbers]
         if numbers:
-            osszeg = sum(numbers)
-            osszes += osszeg
-            await ctx.send(f"Üzenetben lévő számok összege: {osszeg}")
-    await ctx.send(f"Csatorna összes üzenetbeli számának összege: {osszes}")
+            message_sum = sum(numbers)
+            total_sum += message_sum
+    await ctx.send(f"A csatorna utolsó {limit} üzenetében lévő számok összege: {total_sum}")
 
 @bot.event
 async def on_ready():
