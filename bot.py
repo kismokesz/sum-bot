@@ -11,17 +11,24 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 @bot.command()
 async def fidesz_berenc(ctx, limit: int = 50):
     """
-    Összeszámolja az utolsó `limit` üzenetben található számokat
-    és a végén egyetlen összegként adja vissza.
+    Összeadja az utolsó `limit` üzenetben lévő számokat,
+    és üzenetként írja ki a részösszegeket és a végeredményt.
     """
     total_sum = 0
-    
+    numbers_found = []
+
     async for message in ctx.channel.history(limit=limit):
-        # Minden számot külön kezelünk, nem fűzünk össze
         numbers = [int(n) for n in re.findall(r'\d+', message.content)]
-        total_sum += sum(numbers)
-    
-    await ctx.send(f"A csatorna utolsó {limit} üzenetében lévő számok összege: {total_sum}")
+        if numbers:
+            numbers_found.extend(numbers)
+            total_sum += sum(numbers)
+
+    if numbers_found:
+        # Részletek: 5+3+4 = 12
+        expression = " + ".join(str(n) for n in numbers_found)
+        await ctx.send(f"A számok: {expression}\nÖsszegük: {total_sum}")
+    else:
+        await ctx.send("❌ Nem találtam számokat az utolsó üzenetekben!")
 
 @bot.event
 async def on_ready():
