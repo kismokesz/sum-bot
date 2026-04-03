@@ -14,23 +14,15 @@ async def ping(ctx):
 
 @bot.command(name="fidesz_berenc")
 async def fidesz_berenc(ctx, limit: int = 50):
-    """Összeszámolja az utolsó `limit` üzenetben található számokat és kiírja üzenetenként is."""
+    """Összeszámolja az utolsó `limit` üzenetben található számokat."""
     total_sum = 0
-    results = []
     
     async for message in ctx.channel.history(limit=limit):
         numbers = [int(n) for n in re.findall(r'\d+', message.content)]
-        if numbers:
-            message_sum = sum(numbers)
-            total_sum += message_sum
-            # Üzenetenkénti részlet
-            results.append(f"Üzenet: '{message.content}' → számok: {numbers}, összege: {message_sum}")
+        total_sum += sum(numbers)
     
-    # Kiírjuk az üzenetenkénti összegeket
-    if results:
-        for line in reversed(results):  # fordítva, hogy a legfrissebb üzenet legyen legfelül
-            await ctx.send(line)
-        await ctx.send(f"**Teljes összeg az utolsó {limit} üzenetben:** {total_sum}")
+    if total_sum > 0:
+        await ctx.send(f"**A csatorna utolsó {limit} üzenetében lévő számok összege:** {total_sum}")
     else:
         await ctx.send("❌ Nem találtam számokat az utolsó üzenetekben!")
 
