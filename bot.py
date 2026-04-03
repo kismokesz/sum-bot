@@ -5,6 +5,7 @@ from discord.ext import commands
 
 intents = discord.Intents.default()
 intents.message_content = True
+intents.messages = True  # Kell, hogy olvashassa az üzeneteket
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
@@ -16,17 +17,17 @@ async def ping(ctx):
 # Fidesz Berenc parancs
 @bot.command(name="fidesz_berenc")
 async def fidesz_berenc(ctx):
-    # Ellenőrizzük, hogy van-e reply
-    if ctx.message.reference:  # Ha reply
-        replied_message = await ctx.channel.fetch_message(ctx.message.reference.message_id)
-        szamok = [int(n) for n in re.findall(r'\d+', replied_message.content)]
-        if szamok:
-            osszeg = sum(szamok)
-            await ctx.send(f"A 'fidesz_berenc' alatti számok: {szamok}\nÖsszegük: {osszeg}")
-        else:
-            await ctx.send("❌ Nem találtam számokat a reply-elt üzenetben!")
+    # Lekérjük a csatorna összes üzenetét (max 1000)
+    szamok = []
+    async for msg in ctx.channel.history(limit=1000):
+        # Keresés: minden számot kiválasztunk az üzenetből
+        szamok += [int(n) for n in re.findall(r'\d+', msg.content)]
+    
+    if szamok:
+        osszeg = sum(szamok)
+        await ctx.send(f"A csatorna összes számának összege: {osszeg}")
     else:
-        await ctx.send("❌ Kérlek reply-elj az üzenetre, ami a számokat tartalmazza!")
+        await ctx.send("❌ Nem találtam számokat a csatorna üzeneteiben!")
 
 @bot.event
 async def on_ready():
