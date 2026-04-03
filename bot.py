@@ -9,26 +9,35 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
+# Ping parancs teszteléshez
 @bot.command()
 async def ping(ctx):
     await ctx.send("Pong! 🏓")
 
+# Fidesz parancs
 @bot.command(name="fidesz")
 async def fidesz(ctx):
-    osszeg = 0
-    async for message in ctx.channel.history(limit=None):
+    szamok = []
+
+    # Utolsó 200 üzenet lekérése a csatornából
+    async for message in ctx.channel.history(limit=200):
+        # Minden szám kinyerése az üzenetből
         talalatok = re.findall(r'\d+', message.content)
-        osszeg += sum(int(n) for n in talalatok)
+        # Csak 1-2 jegyű számokat vegye figyelembe
+        szamok += [int(n) for n in talalatok if 1 <= len(n) <= 2]
 
-    await ctx.send(f"Összegük: {osszeg}")
+    if szamok:
+        osszeg = sum(szamok)
+        # Az összes számot + végső összeget egy üzenetben küldjük
+        await ctx.send(f"{' + '.join(map(str, szamok))}\nÖsszegük: {osszeg}")
+    else:
+        await ctx.send("❌ Nem találtam 1-2 jegyű számokat az utolsó 200 üzenetben!")
 
+# Ready event
 @bot.event
 async def on_ready():
     print(f'Bejelentkezve mint {bot.user}')
 
 # Token Railway environment variable-ból
 token = os.getenv("DISCORD_TOKEN")
-if not token:
-    print("❌ Hiba: A DISCORD_TOKEN nincs beállítva!")
-else:
-    bot.run(token)
+bot.run(token)
