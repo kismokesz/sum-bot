@@ -1,11 +1,11 @@
 import os
-import re
 import discord
 from discord.ext import commands
+import re
 
+# Intents: üzenetek olvasásához kötelező
 intents = discord.Intents.default()
 intents.message_content = True
-intents.messages = True  # Kell, hogy olvashassa az üzeneteket
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
@@ -14,20 +14,19 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 async def ping(ctx):
     await ctx.send("Pong! 🏓")
 
-# Fidesz Berenc parancs
-@bot.command(name="fidesz_berenc")
-async def fidesz_berenc(ctx):
-    # Lekérjük a csatorna összes üzenetét (max 1000)
-    szamok = []
-    async for msg in ctx.channel.history(limit=1000):
-        # Keresés: minden számot kiválasztunk az üzenetből
-        szamok += [int(n) for n in re.findall(r'\d+', msg.content)]
-    
-    if szamok:
-        osszeg = sum(szamok)
-        await ctx.send(f"A csatorna összes számának összege: {osszeg}")
-    else:
-        await ctx.send("❌ Nem találtam számokat a csatorna üzeneteiben!")
+# Sum parancs: az adott csatorna összes üzenetéből számokat keres és összeadja
+@bot.command(name="sum")
+async def sum_numbers(ctx):
+    total_sum = 0
+    # Limit: hány üzenetet nézzen vissza, pl. 100
+    async for message in ctx.channel.history(limit=100):
+        # Számok kinyerése minden üzenetből
+        numbers = re.findall(r'\d+', message.content)
+        numbers = [int(n) for n in numbers]
+        if numbers:
+            msg_sum = sum(numbers)
+            total_sum += msg_sum
+    await ctx.send(f"A csatorna összes számának összege: {total_sum}")
 
 @bot.event
 async def on_ready():
