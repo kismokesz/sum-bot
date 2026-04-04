@@ -44,31 +44,26 @@ async def on_ready():
 # ---------- Flask web server az UptimeRobot pinghez ----------
 app = Flask('')
 
-# Ping log lista
 ping_log = []
 
 @app.route('/')
 def home():
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    # Hozzáadás a loghoz
     ping_log.append(now)
     if len(ping_log) > 10:
         ping_log.pop(0)
-
-    # Konzolos táblázatos log
+    # Táblázatos log a konzolba
     print("\n┌─────────────── UptimeRobot Ping Log ────────────────┐")
     for i, t in enumerate(ping_log, 1):
         print(f"│ {i:2}. {t} │")
     print("└─────────────────────────────────────────────────────┘\n")
-
     return f"Bot is alive! Last ping: {now}"
 
 def run_flask():
-    # Replit 8080 port, host 0.0.0.0
+    # Replit PORT környezeti változó használata
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
 
-# Flask külön szálon
 Thread(target=run_flask).start()
 
 # ---------- Bot indítása ----------
