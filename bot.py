@@ -5,13 +5,17 @@ from discord.ext import commands
 from flask import Flask
 from threading import Thread
 import datetime
-import sys
+import asyncio
 
 # ---------- Discord bot ----------
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
+# Ide a Discord csatorna ID-je, ahová a ping logot küldeni akarod
+PING_CHANNEL_ID = 123456789012345678  # <--- cseréld a saját csatorna ID-re
+
+# ---------- Discord parancsok ----------
 @bot.command()
 async def ping(ctx):
     await ctx.send("Pong! 🏓")
@@ -42,37 +46,32 @@ async def szoroz(ctx, *szamok: int):
 async def on_ready():
     print(f'Bejelentkezve mint {bot.user}')
 
-# ---------- Flask web server az UptimeRobot pinghez ----------
+# ---------- Flask szerver az Uptimerobot pinghez ----------
 app = Flask('')
-
-ping_log = []
 
 @app.route('/')
 def home():
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    ping_log.append(now)
-    if len(ping_log) > 10:
-        ping_log.pop(0)
-    # Táblázatos log a konzolba
-    print("\n┌─────────────── UptimeRobot Ping Log ────────────────┐")
-    for i, t in enumerate(ping_log, 1):
-        print(f"│ {i:2}. {t} │")
-    print("└─────────────────────────────────────────────────────┘\n")
+    # Aszinkron küldés a Discord csatornára
+    asyncio.run_coroutine_threadsafe(send_ping_to_discord(now), bot.loop)
     return f"Bot is alive! Last ping: {now}"
 
-def run_flask():
-    try:
-        port = int(os.environ.get("PORT", 8080))
-        print(f"[DEBUG] Flask trying to start on port {port}")
-        app.run(host='0.0.0.0', port=port)
-    except Exception as e:
-        print(f"[ERROR] Flask failed to start: {e}", file=sys.stderr)
+async def send_ping_to_discord(timestamp):
+    channel = bot.get_channel(PING_CHANNEL_ID)
+    if channel:
+        await channel.send(f"Ping received at {timestamp} 🟢")
 
+def run_flask():
+    port = int(os.environ.get("PORT", 8080))  # Replit PORT változó
+    print(f"Flask keep-alive server running on port {port}")
+    app.run(host='0.0.0.0', port=port)
+
+# Flask külön szálon
 Thread(target=run_flask).start()
 
 # ---------- Bot indítása ----------
-token = os.getenv("DISCORD_TOKEN")
-if not token:
-    print("[ERROR] DISCORD_TOKEN nincs beállítva!", file=sys.stderr)
+TOKEN = os.getenv("DISCORD_TOKEN")
+if not TOKEN:
+    print("[ERROR] DISCORD_TOKEN nincs beállítva!")
 else:
-    bot.run(token)
+    bot.run(TOKEN)
