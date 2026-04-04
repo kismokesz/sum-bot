@@ -13,7 +13,7 @@ intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 # Discord csatorna ID, ahová a ping logot küldjük
-PING_CHANNEL_ID = 123456789012345678  # <--- cseréld a saját csatornád ID-jére
+PING_CHANNEL_ID = 1490006128875147506  # <--- cseréld a saját csatornád ID-jére
 
 # Időpont, amikor a bot elindult
 bot_start_time = datetime.datetime.now()
