@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 from flask import Flask
 from threading import Thread
+import datetime
 
 # ---------- Discord bot beállítás ----------
 intents = discord.Intents.default()
@@ -21,11 +22,8 @@ async def ping(ctx):
 async def fidesz(ctx):
     szamok = []
 
-    # Utolsó 1000 üzenet lekérése a csatornából
     async for message in ctx.channel.history(limit=1000):
-        # Minden szám kinyerése az üzenetből
         talalatok = re.findall(r'\d+', message.content)
-        # Csak 1-2 jegyű számokat vegye figyelembe
         szamok += [int(n) for n in talalatok if 1 <= len(n) <= 2]
 
     if szamok:
@@ -34,7 +32,7 @@ async def fidesz(ctx):
     else:
         await ctx.send("❌ Nem találtam 1-2 jegyű számokat az utolsó 1000 üzenetben!")
 
-# Szorzás parancs - tetszőleges számú szám
+# Szorzás parancs
 @bot.command(name="szoroz")
 async def szoroz(ctx, *szamok: int):
     if not szamok:
@@ -55,14 +53,30 @@ async def on_ready():
 # ---------- Flask web server az UptimeRobot pinghez ----------
 app = Flask('')
 
+# Ping log lista
+ping_log = []
+
 @app.route('/')
 def home():
-    return "Bot is alive!"
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # Ping hozzáadása a listához
+    ping_log.append(now)
+    
+    # Csak az utolsó 10 pinget tartjuk
+    if len(ping_log) > 10:
+        ping_log.pop(0)
+    
+    # Szép táblázat a konzolba
+    print("\n┌─────────────── UptimeRobot Ping Log ────────────────┐")
+    for i, t in enumerate(ping_log, 1):
+        print(f"│ {i:2}. {t} │")
+    print("└─────────────────────────────────────────────────────┘\n")
+    
+    return f"Bot is alive! Last ping: {now}"
 
 def run():
     app.run(host='0.0.0.0', port=8080)
 
-# Web szerver külön szálon, hogy a bot fusson tovább
 Thread(target=run).start()
 
 # ---------- Bot indítása ----------
