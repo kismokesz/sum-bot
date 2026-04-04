@@ -9,38 +9,47 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Ping parancs
+# Ping parancs teszteléshez
 @bot.command()
 async def ping(ctx):
     await ctx.send("Pong! 🏓")
 
-# Fidesz parancs: számolja az utolsó 1000 üzenet számait
+# Fidesz parancs
 @bot.command(name="fidesz")
 async def fidesz(ctx):
     szamok = []
 
     # Utolsó 1000 üzenet lekérése a csatornából
     async for message in ctx.channel.history(limit=1000):
-        # Kinyeri az 1-2 jegyű számokat az üzenetekből
-        szamok += [int(n) for n in re.findall(r'\d{1,2}', message.content)]
+        # Minden szám kinyerése az üzenetből
+        talalatok = re.findall(r'\d+', message.content)
+        # Csak 1-2 jegyű számokat vegye figyelembe
+        szamok += [int(n) for n in talalatok if 1 <= len(n) <= 2]
 
     if szamok:
         osszeg = sum(szamok)
-        # Összes szám + végső összeget egy üzenetben küldjük
         await ctx.send(f"{' + '.join(map(str, szamok))}\nÖsszegük: {osszeg}")
     else:
-        await ctx.send("❌ Nem találtam rövid számokat az utolsó 1000 üzenetben!")
+        await ctx.send("❌ Nem találtam 1-2 jegyű számokat az utolsó 1000 üzenetben!")
 
-# Multiply parancs: két szám összeszorzása
-@bot.command(name="multiply")
-async def multiply(ctx, num1: int, num2: int):
-    await ctx.send(f"{num1} x {num2} = {num1 * num2}")
+# Szorzás parancs - tetszőleges számú szám
+@bot.command(name="szoroz")
+async def szoroz(ctx, *szamok: int):
+    if not szamok:
+        await ctx.send("❌ Adj meg legalább egy számot a szorzáshoz!")
+        return
+
+    eredmeny = 1
+    for szam in szamok:
+        eredmeny *= szam
+
+    await ctx.send(f"{' * '.join(map(str, szamok))} = {eredmeny}")
 
 # Ready event
 @bot.event
 async def on_ready():
     print(f'Bejelentkezve mint {bot.user}')
 
-# Token Railway/Render environment variable-ból
+# Token Railway environment variable-ból
 token = os.getenv("DISCORD_TOKEN")
 bot.run(token)
