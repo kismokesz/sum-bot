@@ -61,6 +61,7 @@ async def send_ping():
         f"✅ Ping at `{timestamp}` | Bot uptime: {hours}h {minutes}m {seconds}s"
     )
 
+# ---------- Bot ready esemény ----------
 @bot.event
 async def on_ready():
     print(f'Bejelentkezve mint {bot.user}')
