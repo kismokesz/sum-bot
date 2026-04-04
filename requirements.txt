@@ -1,2 +1,2 @@
-py-cord
-Flask
+py-cord==2.3.2
+Flask==2.3.2
