@@ -5,6 +5,7 @@ from discord.ext import commands
 from flask import Flask
 from threading import Thread
 import datetime
+import sys
 
 # ---------- Discord bot ----------
 intents = discord.Intents.default()
@@ -60,12 +61,18 @@ def home():
     return f"Bot is alive! Last ping: {now}"
 
 def run_flask():
-    # Replit PORT környezeti változó használata
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host='0.0.0.0', port=port)
+    try:
+        port = int(os.environ.get("PORT", 8080))
+        print(f"[DEBUG] Flask trying to start on port {port}")
+        app.run(host='0.0.0.0', port=port)
+    except Exception as e:
+        print(f"[ERROR] Flask failed to start: {e}", file=sys.stderr)
 
 Thread(target=run_flask).start()
 
 # ---------- Bot indítása ----------
 token = os.getenv("DISCORD_TOKEN")
-bot.run(token)
+if not token:
+    print("[ERROR] DISCORD_TOKEN nincs beállítva!", file=sys.stderr)
+else:
+    bot.run(token)
