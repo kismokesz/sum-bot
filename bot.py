@@ -12,16 +12,20 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Discord csatorna ID, ahová a ping logot küldjük
-PING_CHANNEL_ID = 1490006128875147506  # <--- ide írd a saját csatorna ID-jét
+# Discord csatorna ID
+PING_CHANNEL_ID = 1490006128875147506
 
-# Időpont, amikor a bot elindult
+# Bot indítási időpont
 bot_start_time = datetime.datetime.now()
 
 # ---------- Discord parancsok ----------
 @bot.command()
 async def ping(ctx):
     await ctx.send("Pong! 🏓")
+
+@bot.command()
+async def testping(ctx):
+    await ctx.send("Ez egy teszt ping üzenet ✅")
 
 @bot.command(name="fidesz")
 async def fidesz(ctx):
@@ -55,12 +59,12 @@ app = Flask('')
 @app.route('/')
 def home():
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    # Csak akkor küldünk üzenetet, ha a bot készen áll
-    if bot.is_ready():
-        asyncio.run_coroutine_threadsafe(send_ping_to_discord(now), bot.loop)
+    # Aszinkron küldés biztosítva
+    asyncio.create_task(wait_and_send_ping(now))
     return f"Bot is alive! Last ping: {now}"
 
-async def send_ping_to_discord(timestamp):
+async def wait_and_send_ping(timestamp):
+    await bot.wait_until_ready()
     channel = bot.get_channel(PING_CHANNEL_ID)
     if channel:
         uptime = datetime.datetime.now() - bot_start_time
