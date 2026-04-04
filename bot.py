@@ -25,6 +25,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
+# Discord csatorna ID (numerikus)
 PING_CHANNEL_ID = 1490006128875147506
 bot_start_time = datetime.datetime.now()
 
@@ -74,6 +75,7 @@ async def send_ping():
         f"✅ Ping at `{timestamp}` | Bot uptime: {hours}h {minutes}m {seconds}s"
     )
 
+# ---------- Ready event ----------
 @bot.event
 async def on_ready():
     print(f'Bejelentkezve mint {bot.user}')
