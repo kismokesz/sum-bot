@@ -36,4 +36,4 @@ async def send_ping():
         print("Nem találom a csatornát!")
 
 # 🔐 IDE AZ ÚJ TOKEN
-bot.run("MTQ4OTYxNzkyNzIzNjc1MTUxMA.GIPYX9.xGCp3XEPvVZOqRsiFqKz0L11PUtb5I72QtwDLg")
+bot.run("ide ird")
