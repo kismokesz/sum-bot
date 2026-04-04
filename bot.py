@@ -17,7 +17,6 @@ def run_flask():
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
 
-# Flask külön szálon fut
 Thread(target=run_flask).start()
 
 # ---------- Discord bot ----------
@@ -25,7 +24,6 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Discord csatorna ID (numerikus)
 PING_CHANNEL_ID = 1490006128875147506
 bot_start_time = datetime.datetime.now()
 
@@ -60,7 +58,7 @@ async def szoroz(ctx, *szamok: int):
         eredmeny *= szam
     await ctx.send(f"{' * '.join(map(str, szamok))} = {eredmeny}")
 
-# ---------- Ping küldése 5 percenként ----------
+# ---------- Ping 5 percenként ----------
 @tasks.loop(minutes=5)
 async def send_ping():
     channel = bot.get_channel(PING_CHANNEL_ID)
@@ -75,13 +73,11 @@ async def send_ping():
         f"✅ Ping at `{timestamp}` | Bot uptime: {hours}h {minutes}m {seconds}s"
     )
 
-# ---------- Ready event ----------
 @bot.event
 async def on_ready():
     print(f'Bejelentkezve mint {bot.user}')
     send_ping.start()
 
-# ---------- Bot indítása ----------
 TOKEN = os.getenv("DISCORD_TOKEN")
 if not TOKEN:
     print("[ERROR] DISCORD_TOKEN nincs beállítva!")
