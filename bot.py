@@ -12,8 +12,11 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Ide a Discord csatorna ID-je, ahová a ping logot küldeni akarod
-PING_CHANNEL_ID = 123456789012345678  # <--- cseréld a saját csatorna ID-re
+# Discord csatorna ID, ahová a ping logot küldjük
+PING_CHANNEL_ID = 123456789012345678  # <--- cseréld a saját csatornád ID-jére
+
+# Időpont, amikor a bot elindult
+bot_start_time = datetime.datetime.now()
 
 # ---------- Discord parancsok ----------
 @bot.command()
@@ -52,17 +55,21 @@ app = Flask('')
 @app.route('/')
 def home():
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    # Aszinkron küldés a Discord csatornára
     asyncio.run_coroutine_threadsafe(send_ping_to_discord(now), bot.loop)
     return f"Bot is alive! Last ping: {now}"
 
 async def send_ping_to_discord(timestamp):
     channel = bot.get_channel(PING_CHANNEL_ID)
     if channel:
-        await channel.send(f"Ping received at {timestamp} 🟢")
+        uptime = datetime.datetime.now() - bot_start_time
+        hours, remainder = divmod(int(uptime.total_seconds()), 3600)
+        minutes, seconds = divmod(remainder, 60)
+        await channel.send(
+            f"✅ Ping received at `{timestamp}` | Bot uptime: {hours}h {minutes}m {seconds}s"
+        )
 
 def run_flask():
-    port = int(os.environ.get("PORT", 8080))  # Replit PORT változó
+    port = int(os.environ.get("PORT", 8080))
     print(f"Flask keep-alive server running on port {port}")
     app.run(host='0.0.0.0', port=port)
 
