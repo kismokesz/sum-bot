@@ -3,16 +3,29 @@ import re
 import discord
 from discord.ext import commands, tasks
 import datetime
+from flask import Flask
+from threading import Thread
+
+# ---------- Flask keep-alive ----------
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "Bot is alive!"
+
+def run_flask():
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
+
+# Flask külön szálon fut
+Thread(target=run_flask).start()
 
 # ---------- Discord bot ----------
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Discord csatorna ID
 PING_CHANNEL_ID = 1490006128875147506
-
-# Bot indítási időpont
 bot_start_time = datetime.datetime.now()
 
 # ---------- Discord parancsok ----------
@@ -51,7 +64,7 @@ async def szoroz(ctx, *szamok: int):
 async def send_ping():
     channel = bot.get_channel(PING_CHANNEL_ID)
     if channel is None:
-        print("[ERROR] Nem találom a csatornát! Ellenőrizd a PING_CHANNEL_ID-t!")
+        print("[ERROR] Nem találom a csatornát!")
         return
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     uptime = datetime.datetime.now() - bot_start_time
@@ -61,11 +74,10 @@ async def send_ping():
         f"✅ Ping at `{timestamp}` | Bot uptime: {hours}h {minutes}m {seconds}s"
     )
 
-# ---------- Bot ready esemény ----------
 @bot.event
 async def on_ready():
     print(f'Bejelentkezve mint {bot.user}')
-    send_ping.start()  # indítjuk a folyamatos ping taskot
+    send_ping.start()
 
 # ---------- Bot indítása ----------
 TOKEN = os.getenv("DISCORD_TOKEN")
