@@ -2,8 +2,10 @@ import os
 import re
 import discord
 from discord.ext import commands
+from flask import Flask
+from threading import Thread
 
-# Intents beállítása
+# ---------- Discord bot beállítás ----------
 intents = discord.Intents.default()
 intents.message_content = True
 
@@ -50,6 +52,19 @@ async def szoroz(ctx, *szamok: int):
 async def on_ready():
     print(f'Bejelentkezve mint {bot.user}')
 
-# Token Railway environment variable-ból
+# ---------- Flask web server az UptimeRobot pinghez ----------
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "Bot is alive!"
+
+def run():
+    app.run(host='0.0.0.0', port=8080)
+
+# Web szerver külön szálon, hogy a bot fusson tovább
+Thread(target=run).start()
+
+# ---------- Bot indítása ----------
 token = os.getenv("DISCORD_TOKEN")
 bot.run(token)
