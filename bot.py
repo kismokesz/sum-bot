@@ -60,26 +60,28 @@ app = Flask('')
 def home():
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     # Aszinkron küldés biztosítva
-    asyncio.create_task(wait_and_send_ping(now))
+    asyncio.run_coroutine_threadsafe(send_ping_safe(now), bot.loop)
     return f"Bot is alive! Last ping: {now}"
 
-async def wait_and_send_ping(timestamp):
+async def send_ping_safe(timestamp):
     await bot.wait_until_ready()
     channel = bot.get_channel(PING_CHANNEL_ID)
-    if channel:
-        uptime = datetime.datetime.now() - bot_start_time
-        hours, remainder = divmod(int(uptime.total_seconds()), 3600)
-        minutes, seconds = divmod(remainder, 60)
-        await channel.send(
-            f"✅ Ping received at `{timestamp}` | Bot uptime: {hours}h {minutes}m {seconds}s"
-        )
+    if channel is None:
+        print("[ERROR] Nem találom a csatornát! Ellenőrizd a PING_CHANNEL_ID-t!")
+        return
+    uptime = datetime.datetime.now() - bot_start_time
+    hours, remainder = divmod(int(uptime.total_seconds()), 3600)
+    minutes, seconds = divmod(remainder, 60)
+    await channel.send(
+        f"✅ Ping received at `{timestamp}` | Bot uptime: {hours}h {minutes}m {seconds}s"
+    )
 
 def run_flask():
     port = int(os.environ.get("PORT", 8080))
     print(f"Flask keep-alive server running on port {port}")
     app.run(host='0.0.0.0', port=port)
 
-# Flask külön szálon
+# Flask külön szálon fut
 Thread(target=run_flask).start()
 
 # ---------- Bot indítása ----------
